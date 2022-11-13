@@ -15,7 +15,7 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   List breweries = [];
   bool isLoading = false;
-  double? deviceHeight;
+  double? deviceHeight, deviceWidth;
 
   @override
   void initState() {
@@ -45,6 +45,7 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     deviceHeight = MediaQuery.of(context).size.height;
+    deviceWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       appBar: AppBar(
@@ -77,7 +78,7 @@ class HomePageState extends State<HomePage> {
   }
 
   Widget getBody() {
-    if (breweries.contains(null) || breweries.length < 0 || isLoading) {
+    if (breweries.contains(null) || isLoading) {
       return const Center(
           child: CircularProgressIndicator(
         valueColor: AlwaysStoppedAnimation<Color>(primary),
@@ -91,7 +92,7 @@ class HomePageState extends State<HomePage> {
   }
 
   Widget getCard(item) {
-    Brewery brewery = Brewery.fromObject(item);
+    Brewery brewery = Brewery.fromMap(item);
     return Card(
       elevation: 1.5,
       child: Padding(
@@ -102,15 +103,27 @@ class HomePageState extends State<HomePage> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  SizedBox(
-                      width: MediaQuery.of(context).size.width - 140,
-                      child: Text(
-                        brewery.name,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      )),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(
+                          width: deviceWidth! * 0.75,
+                          child: Text(
+                            brewery.name,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )),
+                      Icon(
+                        brewery.isLiked == null || brewery.isLiked == false
+                            ? Icons.favorite
+                            : Icons.heart_broken,
+                        color: Colors.pink,
+                        size: 24.0,
+                      ),
+                    ],
+                  ),
                   const SizedBox(
                     height: 10,
                   ),
@@ -152,7 +165,7 @@ class HomePageState extends State<HomePage> {
                     ),
                   ),
                 ],
-              )
+              ),
             ],
           ),
         ),
