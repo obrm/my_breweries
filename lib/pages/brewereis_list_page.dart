@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:my_breweries/models/breweries_list.dart';
 import 'package:my_breweries/models/brewery.dart';
@@ -19,13 +20,14 @@ class BreweriesListPageState extends State<BreweriesListPage> {
   bool isLoading = false;
   double? deviceHeight, deviceWidth;
 
-  LocalStorageService storage = LocalStorageService();
+  LocalStorageService? storage;
   BreweriesList? favoredBreweriesList;
   String storageKey = 'favored_brewery_list';
 
   @override
   void initState() {
     super.initState();
+    storage = GetIt.instance.get<LocalStorageService>();
     fetchBreweries();
   }
 
@@ -63,7 +65,7 @@ class BreweriesListPageState extends State<BreweriesListPage> {
 
   Widget getBody() {
     return FutureBuilder(
-        future: storage.ready,
+        future: storage!.ready,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (breweries.contains(null) || isLoading || snapshot.data == null) {
             return const Center(
@@ -71,7 +73,7 @@ class BreweriesListPageState extends State<BreweriesListPage> {
               valueColor: AlwaysStoppedAnimation<Color>(primary),
             ));
           }
-          favoredBreweriesList = storage.getItem(storageKey);
+          favoredBreweriesList = storage!.getItem(storageKey);
           if (favoredBreweriesList != null) {
             favoredBreweriesList!.list = List<Brewery>.from(
               (favoredBreweriesList as List).map(
@@ -102,14 +104,14 @@ class BreweriesListPageState extends State<BreweriesListPage> {
             if (breweryFromStorage != null) {
               brewery = Brewery.fromMap(item);
               favoredBreweriesList?.removeItemFromList(brewery.id);
-              storage.setItem(
-                  storageKey, favoredBreweriesList?.toJSONEncodable());
+              storage!
+                  .setItem(storageKey, favoredBreweriesList?.toJSONEncodable());
               print(brewery.isFavored);
             } else {
               brewery.isFavored = true;
               favoredBreweriesList?.addItemToList(brewery);
-              storage.setItem(
-                  storageKey, favoredBreweriesList?.toJSONEncodable());
+              storage!
+                  .setItem(storageKey, favoredBreweriesList?.toJSONEncodable());
               brewery = favoredBreweriesList!.list
                   .firstWhere((b) => b.id == Brewery.fromMap(item).id);
               print(brewery.isFavored);

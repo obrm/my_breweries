@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:my_breweries/pages/favorites_page.dart';
 import 'package:my_breweries/pages/home_page.dart';
 import 'package:my_breweries/services/build_material_color.dart';
+import 'package:my_breweries/services/local_storage_service.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  registerLocalStorageService();
   runApp(const MyApp());
 }
 
@@ -32,4 +36,10 @@ class MyApp extends StatelessWidget {
       },
     );
   }
+}
+
+void registerLocalStorageService() {
+  GetIt.instance.registerSingleton<LocalStorageService>(
+    LocalStorageService(),
+  );
 }
