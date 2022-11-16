@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class Brewery {
   final String id;
   final String name;
@@ -6,7 +8,6 @@ class Brewery {
   final String city;
   final String state;
   final String country;
-  bool isFavored;
 
   Brewery({
     required this.id,
@@ -16,19 +17,22 @@ class Brewery {
     required this.city,
     required this.state,
     required this.country,
-    required this.isFavored,
   });
 
   factory Brewery.fromMap(Map brewery) {
     return Brewery(
-        id: brewery['id'],
-        name: brewery['name'],
-        type: brewery['brewery_type'],
-        street: brewery['street'],
-        city: brewery['city'],
-        state: brewery['state'],
-        country: brewery['country'],
-        isFavored: brewery['isFavored'] ?? false);
+      id: brewery['id'],
+      name: brewery['name'],
+      type: brewery['brewery_type'],
+      street: brewery['street'],
+      city: brewery['city'],
+      state: brewery['state'],
+      country: brewery['country'],
+    );
+  }
+
+  factory Brewery.fromJson(String brewery) {
+    return jsonDecode(brewery);
   }
 
   Map toMap() {
@@ -40,7 +44,6 @@ class Brewery {
       "city": city,
       "state": state,
       "country": country,
-      "isFavored": true,
     };
   }
 }
