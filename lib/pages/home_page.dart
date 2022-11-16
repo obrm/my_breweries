@@ -1,45 +1,28 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:my_breweries/models/brewery.dart';
-import 'package:my_breweries/themes/color.dart';
+import 'package:my_breweries/pages/brewereis_list_page.dart';
+import 'package:my_breweries/pages/favorites_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  HomePageState createState() => HomePageState();
+  State<StatefulWidget> createState() {
+    return _HomePageState();
+  }
 }
 
-class HomePageState extends State<HomePage> {
-  List breweries = [];
-  bool isLoading = false;
+class _HomePageState extends State<HomePage> {
   double? deviceHeight, deviceWidth;
+
+  int currentPage = 0;
+  final List<Widget> pages = [
+    const BreweriesListPage(),
+    const FavoritesPage(),
+  ];
 
   @override
   void initState() {
     super.initState();
-    fetchBreweries();
-  }
-
-  fetchBreweries() async {
-    setState(() {
-      isLoading = true;
-    });
-    var url = "https://api.openbrewerydb.org/breweries";
-    var response = await http.get(url);
-    // print(response.body);
-    if (response.statusCode == 200) {
-      var items = json.decode(response.body);
-      setState(() {
-        breweries = items;
-        isLoading = false;
-      });
-    } else {
-      breweries = [];
-      isLoading = false;
-    }
   }
 
   @override
@@ -73,103 +56,42 @@ class HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      body: getBody(),
+      bottomNavigationBar: _bottomNavigationBar(),
+      body: pages[currentPage],
     );
   }
 
-  Widget getBody() {
-    if (breweries.contains(null) || isLoading) {
-      return const Center(
-          child: CircularProgressIndicator(
-        valueColor: AlwaysStoppedAnimation<Color>(primary),
-      ));
-    }
-    return ListView.builder(
-        itemCount: breweries.length,
-        itemBuilder: (context, index) {
-          return getCard(breweries[index]);
+  Widget _bottomNavigationBar() {
+    return BottomNavigationBar(
+      backgroundColor: const Color.fromRGBO(
+        230,
+        203,
+        168,
+        1.0,
+      ),
+      selectedItemColor: const Color.fromRGBO(88, 66, 55, 1.0),
+      currentIndex: currentPage,
+      onTap: (index) {
+        setState(() {
+          currentPage = index;
         });
-  }
-
-  Widget getCard(item) {
-    Brewery brewery = Brewery.fromMap(item);
-    return Card(
-      elevation: 1.5,
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: ListTile(
-          title: Row(
-            children: <Widget>[
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      SizedBox(
-                          width: deviceWidth! * 0.75,
-                          child: Text(
-                            brewery.name,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          )),
-                      Icon(
-                        brewery.isLiked == null || brewery.isLiked == false
-                            ? Icons.favorite
-                            : Icons.heart_broken,
-                        color: Colors.pink,
-                        size: 24.0,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Text(
-                    "Brewery Type: ${brewery.type},",
-                    style: const TextStyle(
-                      color: Colors.black,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          "${brewery.street},",
-                          style: const TextStyle(
-                            color: Colors.grey,
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        Text(
-                          "${brewery.state},",
-                          style: const TextStyle(
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ]),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Text(
-                    brewery.country,
-                    style: const TextStyle(
-                      color: Colors.grey,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+      },
+      items: const [
+        BottomNavigationBarItem(
+          label: 'Breweries List',
+          icon: Icon(
+            Icons.list_alt,
+            color: Color.fromRGBO(88, 66, 55, 1.0),
           ),
         ),
-      ),
+        BottomNavigationBarItem(
+          label: 'Favorite Breweries',
+          icon: Icon(
+            Icons.favorite,
+            color: Color.fromRGBO(88, 66, 55, 1.0),
+          ),
+        ),
+      ],
     );
   }
 }

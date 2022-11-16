@@ -6,9 +6,9 @@ class Brewery {
   final String city;
   final String state;
   final String country;
-  final bool? isLiked;
+  bool isFavored;
 
-  const Brewery({
+  Brewery({
     required this.id,
     required this.name,
     required this.type,
@@ -16,20 +16,19 @@ class Brewery {
     required this.city,
     required this.state,
     required this.country,
-    required this.isLiked,
+    required this.isFavored,
   });
 
   factory Brewery.fromMap(Map brewery) {
     return Brewery(
-      id: brewery['id'],
-      name: brewery['name'],
-      type: brewery['brewery_type'],
-      street: brewery['street'],
-      city: brewery['city'],
-      state: brewery['state'],
-      country: brewery['country'],
-      isLiked: brewery['isLiked'],
-    );
+        id: brewery['id'],
+        name: brewery['name'],
+        type: brewery['brewery_type'],
+        street: brewery['street'],
+        city: brewery['city'],
+        state: brewery['state'],
+        country: brewery['country'],
+        isFavored: brewery['isFavored'] ?? false);
   }
 
   Map toMap() {
@@ -41,7 +40,7 @@ class Brewery {
       "city": city,
       "state": state,
       "country": country,
-      "isLiked": isLiked,
+      "isFavored": true,
     };
   }
 }

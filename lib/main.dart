@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_breweries/pages/favorites_page.dart';
 import 'package:my_breweries/pages/home_page.dart';
 import 'package:my_breweries/services/build_material_color.dart';
 
@@ -24,7 +25,11 @@ class MyApp extends StatelessWidget {
           1.0,
         ),
       ),
-      home: const HomePage(),
+      initialRoute: 'home',
+      routes: {
+        'home': (context) => const HomePage(),
+        'favorites': (context) => const FavoritesPage(),
+      },
     );
   }
 }
