@@ -5,6 +5,7 @@ import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:my_breweries/models/breweries_list.dart';
 import 'package:my_breweries/models/brewery.dart';
+import 'package:my_breweries/services/parse_from_box.dart';
 import 'package:my_breweries/themes/color.dart';
 
 class BreweriesListPage extends StatefulWidget {
@@ -74,7 +75,7 @@ class BreweriesListPageState extends State<BreweriesListPage> {
 
           if (snapshot.hasData) {
             box = snapshot.data;
-            parseFromBox();
+            favoredBreweriesList.list = parseFromBox(box!);
           }
 
           return ListView.builder(
@@ -100,14 +101,14 @@ class BreweriesListPageState extends State<BreweriesListPage> {
           onTap: () {
             if (isFavored) {
               box!.deleteAt(breweryIndex);
-              parseFromBox();
+              favoredBreweriesList.list = parseFromBox(box!);
               setState(() {
                 isFavored = false;
               });
             } else {
               box!.add(brewery.toJson());
               setState(() {
-                parseFromBox();
+                favoredBreweriesList.list = parseFromBox(box!);
               });
             }
           },
@@ -180,14 +181,6 @@ class BreweriesListPageState extends State<BreweriesListPage> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  parseFromBox() {
-    favoredBreweriesList.list = List<Brewery>.from(
-      (box!.values.toList()).map(
-        (item) => Brewery.fromJson(item),
       ),
     );
   }

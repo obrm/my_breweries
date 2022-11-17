@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:my_breweries/models/breweries_list.dart';
 import 'package:my_breweries/models/brewery.dart';
+import 'package:my_breweries/services/parse_from_box.dart';
 import 'package:my_breweries/themes/color.dart';
 
 class FavoritesPage extends StatefulWidget {
@@ -45,7 +46,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
           }
           if (snapshot.hasData) {
             box = snapshot.data;
-            parseFromBox();
+            favoredBreweriesList.list = parseFromBox(box!);
           }
           return ListView.builder(
               itemCount: favoredBreweriesList.list.length,
@@ -64,7 +65,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
           onTap: () {
             setState(() {
               box!.deleteAt(index);
-              parseFromBox();
+              favoredBreweriesList.list = parseFromBox(box!);
             });
           },
           title: Row(
@@ -136,14 +137,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  parseFromBox() {
-    favoredBreweriesList.list = List<Brewery>.from(
-      (box!.values.toList()).map(
-        (item) => Brewery.fromJson(item),
       ),
     );
   }
