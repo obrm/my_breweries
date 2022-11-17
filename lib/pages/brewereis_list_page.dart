@@ -1,11 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:my_breweries/models/breweries_list.dart';
 import 'package:my_breweries/models/brewery.dart';
+import 'package:my_breweries/services/local_storage_service.dart';
 import 'package:my_breweries/themes/color.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class BreweriesListPage extends StatefulWidget {
   const BreweriesListPage({super.key});
@@ -15,49 +16,31 @@ class BreweriesListPage extends StatefulWidget {
 }
 
 class BreweriesListPageState extends State<BreweriesListPage> {
-  List breweriesFromAPI = [];
+  List breweries = [];
   bool isLoading = false;
   double? deviceHeight, deviceWidth;
 
-  String stringListName = 'favored_breweries';
-  List<String>? favoredBreweriesList;
+  bool initialized = false;
+  LocalStorageService? storage;
+  FavoredBreweriesList favoredBreweriesList = FavoredBreweriesList();
+  String storageKey = 'favored_brewery_list';
 
   @override
   void initState() {
     super.initState();
-    _loadFavoredBreweries();
+    storage = GetIt.instance.get<LocalStorageService>();
     fetchBreweries();
   }
 
-  Future<void> _loadFavoredBreweries() async {
-    final prefs = await SharedPreferences.getInstance();
+  _addItem(Brewery brewery) {
     setState(() {
-      favoredBreweriesList = ((prefs.getStringList(stringListName)) ?? []);
+      favoredBreweriesList.list.add(brewery);
+      _saveToStorage();
     });
   }
 
-  Future<void> _addBreweryToFavored(Brewery brewery) async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      favoredBreweriesList!.add(brewery.toString());
-      prefs.setStringList(stringListName, favoredBreweriesList!);
-    });
-  }
-
-  Future<void> _removeBreweryFromFavored(Brewery brewery) async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      favoredBreweriesList!
-          .removeWhere((item) => Brewery.fromJson(item).id == brewery.id);
-      prefs.setStringList(stringListName, favoredBreweriesList!);
-    });
-  }
-
-  bool _checkIfBreweryIsFavored(Brewery brewery) {
-    return favoredBreweriesList!.firstWhere(
-            (e) => Brewery.fromJson(e).id == brewery.id,
-            orElse: () => '') !=
-        '';
+  _saveToStorage() {
+    storage!.setItem(storageKey, favoredBreweriesList.toJSONEncodable());
   }
 
   fetchBreweries() async {
@@ -73,11 +56,11 @@ class BreweriesListPageState extends State<BreweriesListPage> {
     if (response.statusCode == 200) {
       var items = json.decode(response.body);
       setState(() {
-        breweriesFromAPI = items;
+        breweries = items;
         isLoading = false;
       });
     } else {
-      breweriesFromAPI = [];
+      breweries = [];
       isLoading = false;
     }
   }
@@ -93,39 +76,44 @@ class BreweriesListPageState extends State<BreweriesListPage> {
   }
 
   Widget getBody() {
-    if (breweriesFromAPI.contains(null) || isLoading) {
-      return const Center(
-          child: CircularProgressIndicator(
-        valueColor: AlwaysStoppedAnimation<Color>(primary),
-      ));
-    }
-    return ListView.builder(
-        itemCount: breweriesFromAPI.length,
-        itemBuilder: (context, index) {
-          return getBreweryCard(breweriesFromAPI[index]);
+    return FutureBuilder(
+        future: storage!.ready,
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          if (breweries.contains(null) || isLoading || snapshot.data == null) {
+            return const Center(
+                child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(primary),
+            ));
+          }
+          if (!initialized) {
+            var items = storage!.getItem(storageKey);
+            if (items != null) {
+              favoredBreweriesList.list = List<Brewery>.from(
+                (favoredBreweriesList as List).map(
+                  (item) => Brewery.fromJson(item),
+                ),
+              );
+            }
+            initialized = true;
+          }
+
+          return ListView.builder(
+              itemCount: breweries.length,
+              itemBuilder: (context, index) {
+                return getCard(breweries[index]);
+              });
         });
   }
 
-  Widget getBreweryCard(item) {
-    Brewery brewery = Brewery.fromMap(item);
-    bool isFavored = _checkIfBreweryIsFavored(brewery);
+  Widget getCard(item) {
+    Brewery brewery = Brewery.fromJson(item);
     return Card(
       elevation: 1.5,
       child: Padding(
         padding: const EdgeInsets.all(10.0),
         child: ListTile(
           onTap: () {
-            if (isFavored) {
-              _removeBreweryFromFavored(brewery);
-              setState(() {
-                isFavored = false;
-              });
-            } else {
-              _addBreweryToFavored(brewery);
-              setState(() {
-                isFavored = true;
-              });
-            }
+            _addItem(brewery);
           },
           title: Row(
             children: <Widget>[
@@ -145,7 +133,7 @@ class BreweriesListPageState extends State<BreweriesListPage> {
                             ),
                           )),
                       Icon(
-                        isFavored ? Icons.heart_broken : Icons.favorite,
+                        brewery.isFavored ? Icons.heart_broken : Icons.favorite,
                         color: Colors.pink,
                         size: 24.0,
                       ),
