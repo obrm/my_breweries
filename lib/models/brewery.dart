@@ -19,7 +19,7 @@ class Brewery {
     required this.isFavored,
   });
 
-  factory Brewery.fromJson(Map<String, dynamic> brewery) {
+  factory Brewery.fromJson(Map<dynamic, dynamic> brewery) {
     return Brewery(
       id: brewery['id'] ?? '',
       name: brewery['name'] ?? '',
