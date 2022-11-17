@@ -91,8 +91,6 @@ class BreweriesListPageState extends State<BreweriesListPage> {
     bool isFavored = favoredBreweriesList.list
             .indexWhere((element) => element.id == brewery.id) !=
         -1;
-    int breweryIndex = favoredBreweriesList.list
-        .indexWhere((element) => element.id == brewery.id);
     return Card(
       elevation: 1.5,
       child: Padding(
@@ -100,6 +98,8 @@ class BreweriesListPageState extends State<BreweriesListPage> {
         child: ListTile(
           onTap: () {
             if (isFavored) {
+              int breweryIndex = favoredBreweriesList.list
+                  .indexWhere((element) => element.id == brewery.id);
               box!.deleteAt(breweryIndex);
               favoredBreweriesList.list = parseFromBox(box!);
               setState(() {
