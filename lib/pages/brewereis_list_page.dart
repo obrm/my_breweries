@@ -1,11 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:my_breweries/models/breweries_list.dart';
 import 'package:my_breweries/models/brewery.dart';
-import 'package:my_breweries/services/local_storage_service.dart';
 import 'package:my_breweries/themes/color.dart';
 
 class BreweriesListPage extends StatefulWidget {
@@ -20,27 +19,14 @@ class BreweriesListPageState extends State<BreweriesListPage> {
   bool isLoading = false;
   double? deviceHeight, deviceWidth;
 
-  bool initialized = false;
-  LocalStorageService? storage;
+  Box? box;
   FavoredBreweriesList favoredBreweriesList = FavoredBreweriesList();
-  String storageKey = 'favored_brewery_list';
+  String boxKey = 'favored_breweries_list';
 
   @override
   void initState() {
     super.initState();
-    storage = GetIt.instance.get<LocalStorageService>();
     fetchBreweries();
-  }
-
-  _addItem(Brewery brewery) {
-    setState(() {
-      favoredBreweriesList.list.add(brewery);
-      _saveToStorage();
-    });
-  }
-
-  _saveToStorage() {
-    storage!.setItem(storageKey, favoredBreweriesList.toJSONEncodable());
   }
 
   fetchBreweries() async {
@@ -77,7 +63,7 @@ class BreweriesListPageState extends State<BreweriesListPage> {
 
   Widget getBody() {
     return FutureBuilder(
-        future: storage!.ready,
+        future: Hive.openBox(boxKey),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (breweries.contains(null) || isLoading || snapshot.data == null) {
             return const Center(
@@ -85,16 +71,10 @@ class BreweriesListPageState extends State<BreweriesListPage> {
               valueColor: AlwaysStoppedAnimation<Color>(primary),
             ));
           }
-          if (!initialized) {
-            var items = storage!.getItem(storageKey);
-            if (items != null) {
-              favoredBreweriesList.list = List<Brewery>.from(
-                (favoredBreweriesList as List).map(
-                  (item) => Brewery.fromJson(item),
-                ),
-              );
-            }
-            initialized = true;
+
+          if (snapshot.hasData) {
+            box = snapshot.data;
+            parseFromBox();
           }
 
           return ListView.builder(
@@ -107,13 +87,29 @@ class BreweriesListPageState extends State<BreweriesListPage> {
 
   Widget getCard(item) {
     Brewery brewery = Brewery.fromJson(item);
+    bool isFavored = favoredBreweriesList.list
+            .indexWhere((element) => element.id == brewery.id) !=
+        -1;
+    int breweryIndex = favoredBreweriesList.list
+        .indexWhere((element) => element.id == brewery.id);
     return Card(
       elevation: 1.5,
       child: Padding(
         padding: const EdgeInsets.all(10.0),
         child: ListTile(
           onTap: () {
-            _addItem(brewery);
+            if (isFavored) {
+              box!.deleteAt(breweryIndex);
+              parseFromBox();
+              setState(() {
+                isFavored = false;
+              });
+            } else {
+              box!.add(brewery.toJson());
+              setState(() {
+                parseFromBox();
+              });
+            }
           },
           title: Row(
             children: <Widget>[
@@ -133,7 +129,7 @@ class BreweriesListPageState extends State<BreweriesListPage> {
                             ),
                           )),
                       Icon(
-                        brewery.isFavored ? Icons.heart_broken : Icons.favorite,
+                        isFavored ? Icons.heart_broken : Icons.favorite,
                         color: Colors.pink,
                         size: 24.0,
                       ),
@@ -184,6 +180,14 @@ class BreweriesListPageState extends State<BreweriesListPage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  parseFromBox() {
+    favoredBreweriesList.list = List<Brewery>.from(
+      (box!.values.toList()).map(
+        (item) => Brewery.fromJson(item),
       ),
     );
   }

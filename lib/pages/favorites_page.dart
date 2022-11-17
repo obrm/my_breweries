@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
+import 'package:hive/hive.dart';
 import 'package:my_breweries/models/breweries_list.dart';
 import 'package:my_breweries/models/brewery.dart';
-import 'package:my_breweries/services/local_storage_service.dart';
 import 'package:my_breweries/themes/color.dart';
 
 class FavoritesPage extends StatefulWidget {
@@ -15,15 +14,13 @@ class FavoritesPage extends StatefulWidget {
 class _FavoritesPageState extends State<FavoritesPage> {
   double? deviceHeight, deviceWidth;
 
-  bool initialized = false;
-  LocalStorageService? storage;
+  Box? box;
   FavoredBreweriesList favoredBreweriesList = FavoredBreweriesList();
-  String storageKey = 'favored_brewery_list';
+  String boxKey = 'favored_breweries_list';
 
   @override
   void initState() {
     super.initState();
-    storage = GetIt.instance.get<LocalStorageService>();
   }
 
   @override
@@ -38,7 +35,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
   Widget getBody() {
     return FutureBuilder(
-        future: storage!.ready,
+        future: Hive.openBox(boxKey),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (snapshot.data == null) {
             return const Center(
@@ -46,33 +43,30 @@ class _FavoritesPageState extends State<FavoritesPage> {
               valueColor: AlwaysStoppedAnimation<Color>(primary),
             ));
           }
-          if (!initialized) {
-            var items = storage!.getItem(storageKey);
-            if (items != null) {
-              favoredBreweriesList.list = List<Brewery>.from(
-                (favoredBreweriesList as List).map(
-                  (item) => Brewery.fromJson(item),
-                ),
-              );
-            }
-            initialized = true;
+          if (snapshot.hasData) {
+            box = snapshot.data;
+            parseFromBox();
           }
           return ListView.builder(
               itemCount: favoredBreweriesList.list.length,
               itemBuilder: (context, index) {
-                return getCard(favoredBreweriesList.list[index]);
+                return getCard(favoredBreweriesList.list[index], index);
               });
         });
   }
 
-  Widget getCard(item) {
-    Brewery brewery = Brewery.fromJson(item);
+  Widget getCard(Brewery brewery, int index) {
     return Card(
       elevation: 1.5,
       child: Padding(
         padding: const EdgeInsets.all(10.0),
         child: ListTile(
-          onTap: () {},
+          onTap: () {
+            setState(() {
+              box!.deleteAt(index);
+              parseFromBox();
+            });
+          },
           title: Row(
             children: <Widget>[
               Column(
@@ -142,6 +136,14 @@ class _FavoritesPageState extends State<FavoritesPage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  parseFromBox() {
+    favoredBreweriesList.list = List<Brewery>.from(
+      (box!.values.toList()).map(
+        (item) => Brewery.fromJson(item),
       ),
     );
   }
