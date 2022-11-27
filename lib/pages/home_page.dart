@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_breweries/pages/brewereis_list_page.dart';
+import 'package:my_breweries/pages/breweries_list_page.dart';
 import 'package:my_breweries/pages/favorites_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -12,7 +12,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  double? deviceHeight, deviceWidth;
+  double? deviceHeight;
 
   int currentPage = 0;
   final List<Widget> pages = [
@@ -28,7 +28,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     deviceHeight = MediaQuery.of(context).size.height;
-    deviceWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       appBar: AppBar(

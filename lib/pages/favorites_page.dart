@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:my_breweries/models/breweries_list.dart';
+import 'package:my_breweries/models/favored_breweries_list.dart';
 import 'package:my_breweries/models/brewery.dart';
 import 'package:my_breweries/services/parse_from_box.dart';
 import 'package:my_breweries/themes/color.dart';
@@ -13,7 +13,7 @@ class FavoritesPage extends StatefulWidget {
 }
 
 class _FavoritesPageState extends State<FavoritesPage> {
-  double? deviceHeight, deviceWidth;
+  double? deviceWidth;
 
   Box? box;
   FavoredBreweriesList favoredBreweriesList = FavoredBreweriesList();
@@ -26,7 +26,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
   @override
   Widget build(BuildContext context) {
-    deviceHeight = MediaQuery.of(context).size.height;
     deviceWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
@@ -85,8 +84,8 @@ class _FavoritesPageState extends State<FavoritesPage> {
                               fontWeight: FontWeight.bold,
                             ),
                           )),
-                      Icon(
-                        brewery.isFavored ? Icons.heart_broken : Icons.favorite,
+                      const Icon(
+                        Icons.heart_broken,
                         color: Colors.pink,
                         size: 24.0,
                       ),

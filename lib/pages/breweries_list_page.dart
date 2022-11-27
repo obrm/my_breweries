@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
-import 'package:my_breweries/models/breweries_list.dart';
+import 'package:my_breweries/models/favored_breweries_list.dart';
 import 'package:my_breweries/models/brewery.dart';
 import 'package:my_breweries/services/parse_from_box.dart';
 import 'package:my_breweries/themes/color.dart';
@@ -18,7 +18,7 @@ class BreweriesListPage extends StatefulWidget {
 class BreweriesListPageState extends State<BreweriesListPage> {
   List breweries = [];
   bool isLoading = false;
-  double? deviceHeight, deviceWidth;
+  double? deviceWidth;
 
   Box? box;
   FavoredBreweriesList favoredBreweriesList = FavoredBreweriesList();
@@ -54,7 +54,6 @@ class BreweriesListPageState extends State<BreweriesListPage> {
 
   @override
   Widget build(BuildContext context) {
-    deviceHeight = MediaQuery.of(context).size.height;
     deviceWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
@@ -121,14 +120,15 @@ class BreweriesListPageState extends State<BreweriesListPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       SizedBox(
-                          width: deviceWidth! * 0.75,
-                          child: Text(
-                            brewery.name,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          )),
+                        width: deviceWidth! * 0.75,
+                        child: Text(
+                          brewery.name,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                       Icon(
                         isFavored ? Icons.heart_broken : Icons.favorite,
                         color: Colors.pink,
@@ -149,24 +149,25 @@ class BreweriesListPageState extends State<BreweriesListPage> {
                     height: 10,
                   ),
                   Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          "${brewery.street},",
-                          style: const TextStyle(
-                            color: Colors.grey,
-                          ),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        "${brewery.street},",
+                        style: const TextStyle(
+                          color: Colors.grey,
                         ),
-                        const SizedBox(
-                          width: 10,
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      Text(
+                        "${brewery.state},",
+                        style: const TextStyle(
+                          color: Colors.grey,
                         ),
-                        Text(
-                          "${brewery.state},",
-                          style: const TextStyle(
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ]),
+                      ),
+                    ],
+                  ),
                   const SizedBox(
                     height: 10,
                   ),
