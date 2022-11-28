@@ -19,8 +19,10 @@ class MyApp extends StatelessWidget {
       title: 'My Breweries',
       theme: ThemeData(
         primarySwatch: buildMaterialColor(
+          // CR: Magic Constant
           const Color(0xFF0008C1),
         ),
+        // CR: Magic Constant
         scaffoldBackgroundColor: const Color.fromRGBO(
           230,
           203,

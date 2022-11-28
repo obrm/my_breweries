@@ -15,6 +15,7 @@ class FavoritesPage extends StatefulWidget {
 class _FavoritesPageState extends State<FavoritesPage> {
   double? deviceHeight, deviceWidth;
 
+   // CR: Should be contained under a service
   Box? box;
   FavoredBreweriesList favoredBreweriesList = FavoredBreweriesList();
   String boxKey = 'favored_breweries_list';

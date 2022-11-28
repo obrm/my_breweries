@@ -22,6 +22,7 @@ class BreweriesListPageState extends State<BreweriesListPage> {
 
   Box? box;
   FavoredBreweriesList favoredBreweriesList = FavoredBreweriesList();
+  // CR: Magic Const
   String boxKey = 'favored_breweries_list';
 
   @override
@@ -30,6 +31,9 @@ class BreweriesListPageState extends State<BreweriesListPage> {
     fetchBreweries();
   }
 
+  // CR: I would expect it to be a service, so in the future
+  // CR: Decoupling from the specific API
+  // CR: If I would wrap the api myself, or even make the favorites saved up in a DB on the serverside
   fetchBreweries() async {
     setState(() {
       isLoading = true;
@@ -86,6 +90,8 @@ class BreweriesListPageState extends State<BreweriesListPage> {
         });
   }
 
+  // CR: I would try and splitup those Widgets to different subcompoentent
+  // CR: Gain more resuability out of the components in the future.
   Widget getCard(item) {
     Brewery brewery = Brewery.fromJson(item);
     bool isFavored = favoredBreweriesList.list

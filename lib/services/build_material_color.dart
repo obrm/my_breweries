@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+// CR: What is the purpose of this codebase?
+// CR: Only used once
 MaterialColor buildMaterialColor(Color color) {
   List strengths = <double>[.05];
   Map<int, Color> swatch = {};
